@@ -86,6 +86,22 @@ app.post("/api/analyze", handleUpload, async (req, res) => {
   }
 });
 
+// Friendly download name like "Ameen Story Report 2026-06-07_1415.pdf" — falls
+// back to "Story Report ..." when no speaker name was given. Stripped down to
+// filesystem/header-safe characters so it survives across OSes and browsers.
+function buildReportFilename(feedback) {
+  const speaker = (feedback.speakerName || "").trim();
+  const stamp = new Date(feedback.generatedAt || Date.now())
+    .toISOString()
+    .slice(0, 16)
+    .replace("T", "_")
+    .replace(/:/g, "");
+
+  const raw = speaker ? `${speaker} Story Report ${stamp}` : `Story Report ${stamp}`;
+  const safe = raw.replace(/[^a-zA-Z0-9 _-]/g, "").replace(/\s+/g, " ").trim();
+  return `${safe || "Story Report"}.pdf`;
+}
+
 app.get("/api/report/:id/pdf", (req, res) => {
   const feedback = reports.get(req.params.id);
   if (!feedback) {
@@ -93,7 +109,7 @@ app.get("/api/report/:id/pdf", (req, res) => {
   }
 
   res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="feedback-${req.params.id}.pdf"`);
+  res.setHeader("Content-Disposition", `attachment; filename="${buildReportFilename(feedback)}"`);
   buildFeedbackPdf(feedback, res);
 });
 
