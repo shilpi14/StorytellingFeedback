@@ -5,9 +5,10 @@ const { analyzeVideoWithGemini } = require("./feedbackAnalysis");
 /**
  * Runs the full pipeline — Deepgram transcription, then a single Gemini call
  * that watches the video and reads the transcript to produce structured
- * tone/delivery/visual/content feedback — assembled into the PDF's expected shape.
+ * speech/body-language/content-structure feedback (each with its own short
+ * summary plus 0-3 coaching suggestions) — assembled into the PDF's expected shape.
  */
-async function analyzeVideo(videoBuffer, fileName, mimeType) {
+async function analyzeVideo(videoBuffer, fileName, mimeType, { speakerName = "", context = "" } = {}) {
   const audioBuffer = await extractAudio(videoBuffer);
   const transcription = await transcribeAudio(audioBuffer);
 
@@ -16,7 +17,9 @@ async function analyzeVideo(videoBuffer, fileName, mimeType) {
     mimeType,
     fileName,
     transcript: transcription.transcript,
-    durationSeconds: transcription.durationSeconds
+    durationSeconds: transcription.durationSeconds,
+    speakerName,
+    context
   });
 
   const overallScore = Math.round(
@@ -25,15 +28,30 @@ async function analyzeVideo(videoBuffer, fileName, mimeType) {
 
   return {
     fileName,
+    speakerName,
+    context,
     generatedAt: new Date().toISOString(),
     overallScore,
     sections: [
-      { title: "Clarity of Speech & Voice Modulation", score: feedback.speech.score, summary: feedback.speech.summary },
-      { title: "Body Language & Facial Expression", score: feedback.bodyLanguage.score, summary: feedback.bodyLanguage.summary },
-      { title: "Content Structure", score: feedback.contentStructure.score, summary: feedback.contentStructure.summary }
-    ],
-    strengths: feedback.strengths,
-    improvements: feedback.improvements
+      {
+        title: "Clarity of Speech & Voice Modulation",
+        score: feedback.speech.score,
+        summary: feedback.speech.summary,
+        coachingSuggestions: feedback.speech.coachingSuggestions || []
+      },
+      {
+        title: "Body Language & Facial Expression",
+        score: feedback.bodyLanguage.score,
+        summary: feedback.bodyLanguage.summary,
+        coachingSuggestions: feedback.bodyLanguage.coachingSuggestions || []
+      },
+      {
+        title: "Content Structure",
+        score: feedback.contentStructure.score,
+        summary: feedback.contentStructure.summary,
+        coachingSuggestions: feedback.contentStructure.coachingSuggestions || []
+      }
+    ]
   };
 }
 

@@ -38,10 +38,13 @@ app.post("/api/analyze", upload.single("video"), async (req, res) => {
     return res.status(400).json({ error: "Uploaded file must be a video." });
   }
 
+  const speakerName = (req.body.speakerName || "").trim();
+  const context = (req.body.context || "").trim();
+
   try {
     const feedback = apisConfigured
-      ? await analyzeVideo(req.file.buffer, req.file.originalname, req.file.mimetype)
-      : generateFeedback(req.file.originalname);
+      ? await analyzeVideo(req.file.buffer, req.file.originalname, req.file.mimetype, { speakerName, context })
+      : generateFeedback(req.file.originalname, { speakerName, context });
 
     const id = crypto.randomUUID();
     reports.set(id, feedback);

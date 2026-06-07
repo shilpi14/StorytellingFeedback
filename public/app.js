@@ -1,3 +1,5 @@
+const speakerNameInput = document.getElementById("speaker-name");
+const speakerContextInput = document.getElementById("speaker-context");
 const videoInput = document.getElementById("video-input");
 const fileNameLabel = document.getElementById("file-name");
 const analyzeBtn = document.getElementById("analyze-btn");
@@ -61,6 +63,8 @@ analyzeBtn.addEventListener("click", async () => {
 
   const formData = new FormData();
   formData.append("video", selectedFile);
+  formData.append("speakerName", speakerNameInput.value.trim());
+  formData.append("context", speakerContextInput.value.trim());
 
   try {
     const response = await fetch("/api/analyze", { method: "POST", body: formData });

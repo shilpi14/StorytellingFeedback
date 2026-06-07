@@ -47,6 +47,41 @@ body {
   display: none;
 }
 
+.field {
+  text-align: left;
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a4a55;
+  margin-bottom: 6px;
+}
+
+.field-hint {
+  font-weight: 400;
+  color: #9a98ab;
+}
+
+.field input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e1ddf7;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1a1a1a;
+  background: #faf9ff;
+}
+
+.field input[type="text"]:focus {
+  outline: none;
+  border-color: #8b6cf2;
+  background: #fff;
+}
+
 .upload-label {
   display: flex;
   flex-direction: column;
