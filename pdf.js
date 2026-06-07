@@ -14,13 +14,6 @@ function toTen(scoreOutOf100) {
   return Math.round(scoreOutOf100) / 10;
 }
 
-function formatTimestamp(seconds) {
-  const total = Math.max(0, Math.round(seconds || 0));
-  const minutes = Math.floor(total / 60);
-  const secs = total % 60;
-  return `${minutes}:${String(secs).padStart(2, "0")}`;
-}
-
 function formatDate(iso) {
   try {
     return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
@@ -298,58 +291,6 @@ function buildFeedbackPdf(feedback, res) {
 
     doc.x = margin;
     doc.y = pfBottom + 22;
-  }
-
-  // ---- Moments from the video — larger gallery shots ----
-  if (feedback.frames && feedback.frames.length) {
-    const displayWidth = 260;
-    const centerX = margin + (contentWidth - displayWidth) / 2;
-    const captionGap = 4;
-    const captionHeight = 14;
-    const blockGap = 14;
-
-    // Reserve room for the heading AND the first photo together so the
-    // heading never gets stranded alone at the bottom of a page.
-    let firstBlockHeight = displayWidth * 0.6 + captionGap + captionHeight;
-    try {
-      const firstImg = doc.openImage(feedback.frames[0].image);
-      firstBlockHeight = (displayWidth / firstImg.width) * firstImg.height + captionGap + captionHeight;
-    } catch {
-      // use the fallback estimate
-    }
-    doc.fontSize(13).font("Times-Bold");
-    const headingHeight = doc.heightOfString("Moments from the Video", { width: contentWidth });
-    ensureSpace(headingHeight + 14 + firstBlockHeight);
-
-    doc.fontSize(13).font("Times-Bold").fillColor(HEADING)
-      .text("Moments from the Video", margin, doc.y);
-    doc.moveDown(0.6);
-
-    feedback.frames.forEach((frame) => {
-      let displayHeight = displayWidth * 0.6;
-      try {
-        const img = doc.openImage(frame.image);
-        displayHeight = (displayWidth / img.width) * img.height;
-      } catch {
-        return;
-      }
-
-      const blockHeight = displayHeight + captionGap + captionHeight;
-      ensureSpace(blockHeight);
-
-      try {
-        doc.image(frame.image, centerX, doc.y, { width: displayWidth, height: displayHeight });
-      } catch {
-        return;
-      }
-
-      const captionY = doc.y + displayHeight + captionGap;
-      doc.fontSize(9).fillColor(MUTED).font("Helvetica")
-        .text(formatTimestamp(frame.timestamp), margin, captionY, { width: contentWidth, align: "center" });
-
-      doc.y = captionY + captionHeight + blockGap;
-      doc.x = margin;
-    });
   }
 
   doc.end();
