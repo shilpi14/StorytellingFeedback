@@ -1,3 +1,4 @@
+const heroEl = document.getElementById("hero");
 const speakerNameInput = document.getElementById("speaker-name");
 const speakerContextInput = document.getElementById("speaker-context");
 const videoInput = document.getElementById("video-input");
@@ -26,6 +27,9 @@ function showOnly(section) {
   [uploadSection, statusSection, resultSection, errorSection].forEach((s) => {
     s.classList.toggle("hidden", s !== section);
   });
+  // The results screen is long enough on its own — skip the hero title there
+  // and let it open straight into the score and feedback.
+  if (heroEl) heroEl.classList.toggle("hidden", section === resultSection);
 }
 
 videoInput.addEventListener("change", () => {
