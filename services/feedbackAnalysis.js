@@ -27,36 +27,67 @@ function categorySchema(summaryDescription) {
 const FEEDBACK_SCHEMA = {
   type: SchemaType.OBJECT,
   properties: {
-    speech: categorySchema(
-      "1-2 sentences assessing clarity of speech and voice modulation — articulation, pacing, " +
-      "filler words, vocal energy, tone, and how well the voice's pitch/volume/emphasis varied " +
-      "to keep the listener engaged."
+    overallSummary: {
+      type: SchemaType.STRING,
+      description:
+        "1-2 short paragraphs (separated by a blank line) giving an overall impression of the " +
+        "speaker's storytelling — their general delivery style, presence, and the big-picture " +
+        "takeaway from this video."
+    },
+    openingHook: categorySchema(
+      "1-2 sentences on how the talk opens — does the title/intro create context, and does the " +
+      "hook grab the audience's attention right away?"
     ),
-    bodyLanguage: categorySchema(
-      "1-2 sentences assessing body language and facial expression — eye contact with the " +
-      "camera, posture, framing, facial expressiveness, and use of gestures."
+    narrativeStructure: categorySchema(
+      "1-2 sentences on the story's structure — clear beginning/middle/end, logical flow, use of " +
+      "credibility markers or proof points, and build toward a climactic moment."
     ),
-    contentStructure: categorySchema(
-      "1-2 sentences assessing content structure — quality of the opening (does it hook the " +
-      "audience), impact of the closing, coherence and logical flow of ideas, persuasion through " +
-      "emotional appeal/logic/credibility (ethos/pathos/logos), and general language quality."
-    )
+    bodyLanguagePresence: categorySchema(
+      "1-2 sentences on body language and presence — posture, gestures, movement, and overall " +
+      "expressiveness/energy."
+    ),
+    vocalDeliveryPacing: categorySchema(
+      "1-2 sentences on vocal delivery and pacing — vocal variety, energy, pauses, and emotional range."
+    ),
+    storyContent: categorySchema(
+      "1-2 sentences on the substance of the story/content — relevance of the topic, use of " +
+      "examples or evidence, and how well it establishes credibility."
+    ),
+    landingTakeaway: categorySchema(
+      "1-2 sentences on how the talk concludes — clarity and impact of the closing, and whether " +
+      "it leaves a memorable, actionable takeaway."
+    ),
+    priorityFocus: {
+      type: SchemaType.STRING,
+      description:
+        "ONE short paragraph (2-3 sentences) naming the single most impactful thing this speaker " +
+        "should focus on improving before their next session — the one change that would make the " +
+        "biggest difference."
+    }
   },
-  required: ["speech", "bodyLanguage", "contentStructure"]
+  required: [
+    "overallSummary",
+    "openingHook",
+    "narrativeStructure",
+    "bodyLanguagePresence",
+    "vocalDeliveryPacing",
+    "storyContent",
+    "landingTakeaway",
+    "priorityFocus"
+  ]
 };
 
-const SYSTEM_PROMPT = `You are an expert communication and presentation coach. You will be given a video
-of someone speaking, along with its transcript (and possibly the speaker's name and the context/topic
-of the talk). Watch the video and read the transcript, then assess the speaker across exactly three
-categories:
+const SYSTEM_PROMPT = `You are an expert storytelling and presentation coach for StoryWallahs. You will be
+given a video of someone telling a story or giving a talk, along with its transcript (and possibly the
+speaker's name and the context/topic). Watch the video and read the transcript, then assess the speaker
+across exactly six categories, in this order:
 
-- Clarity of speech and voice modulation: articulation, pacing, filler-word usage, vocal energy,
-  emotional tone, and how well pitch/volume/emphasis varied to keep the listener engaged
-- Body language and facial expression: eye contact with the camera, posture, framing,
-  facial expressiveness, and use of gestures
-- Content structure: a strong opening that hooks the audience, an impactful closing, coherence and
-  logical flow of ideas, and persuasion through emotional appeal, logic, and credibility — plus
-  general language quality (grammar, vocabulary, clarity)
+1. Opening & Hook — does the intro create context and immediately grab attention?
+2. Narrative Structure — clear beginning/middle/end, logical flow, credibility markers, build to a climax
+3. Body Language & Presence — posture, gestures, movement, expressiveness, energy
+4. Vocal Delivery & Pacing — vocal variety, energy, pauses, emotional range
+5. Story Content — relevance, use of examples/evidence, credibility
+6. Landing & Takeaway — clarity and impact of the closing, memorable takeaway
 
 For each category, give a score from 0-100, a short 1-2 sentence summary, and 0-3 coaching
 suggestions specific to THAT category. Keep every coaching suggestion to ONE short, punchy
@@ -64,6 +95,10 @@ sentence (about 8-14 words) — specific and actionable (reference actual moment
 visual details where possible), never a vague platitude. Only include suggestions that truly add
 value; if the speaker is already excellent in a category, it's fine to return an empty list rather
 than inventing generic advice.
+
+Also provide:
+- overallSummary: 1-2 short paragraphs (separated by a blank line) giving the big-picture impression
+- priorityFocus: ONE short paragraph naming the single most impactful thing to focus on next
 
 Respond only with the structured JSON described by the schema.`;
 
@@ -88,8 +123,7 @@ async function uploadVideo(videoBuffer, mimeType, displayName) {
 
 /**
  * Sends the uploaded video plus its transcript (and optional speaker name / context)
- * to Gemini and returns structured speech/body-language/content-structure scores,
- * summaries, and per-category coaching suggestions.
+ * to Gemini and returns the structured six-category storytelling assessment.
  */
 async function analyzeVideoWithGemini({
   videoBuffer,

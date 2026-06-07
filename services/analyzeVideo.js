@@ -2,11 +2,23 @@ const { extractAudio } = require("./mediaExtraction");
 const { transcribeAudio } = require("./transcription");
 const { analyzeVideoWithGemini } = require("./feedbackAnalysis");
 
+const SECTION_DEFS = [
+  { key: "openingHook", title: "Opening & Hook" },
+  { key: "narrativeStructure", title: "Narrative Structure" },
+  { key: "bodyLanguagePresence", title: "Body Language & Presence" },
+  { key: "vocalDeliveryPacing", title: "Vocal Delivery & Pacing" },
+  { key: "storyContent", title: "Story Content" },
+  { key: "landingTakeaway", title: "Landing & Takeaway" }
+];
+
 /**
  * Runs the full pipeline — Deepgram transcription, then a single Gemini call
- * that watches the video and reads the transcript to produce structured
- * speech/body-language/content-structure feedback (each with its own short
- * summary plus 0-3 coaching suggestions) — assembled into the PDF's expected shape.
+ * that watches the video and reads the transcript to produce the StoryWallahs
+ * six-category storytelling assessment (Opening & Hook / Narrative Structure /
+ * Body Language & Presence / Vocal Delivery & Pacing / Story Content /
+ * Landing & Takeaway), each with its own short summary plus 0-3 coaching
+ * suggestions, an overall summary, and a closing priority focus — assembled
+ * into the PDF's expected shape.
  */
 async function analyzeVideo(videoBuffer, fileName, mimeType, { speakerName = "", context = "" } = {}) {
   const audioBuffer = await extractAudio(videoBuffer);
@@ -22,8 +34,15 @@ async function analyzeVideo(videoBuffer, fileName, mimeType, { speakerName = "",
     context
   });
 
+  const sections = SECTION_DEFS.map(({ key, title }) => ({
+    title,
+    score: feedback[key].score,
+    summary: feedback[key].summary,
+    coachingSuggestions: feedback[key].coachingSuggestions || []
+  }));
+
   const overallScore = Math.round(
-    (feedback.speech.score + feedback.bodyLanguage.score + feedback.contentStructure.score) / 3
+    sections.reduce((sum, section) => sum + section.score, 0) / sections.length
   );
 
   return {
@@ -32,26 +51,9 @@ async function analyzeVideo(videoBuffer, fileName, mimeType, { speakerName = "",
     context,
     generatedAt: new Date().toISOString(),
     overallScore,
-    sections: [
-      {
-        title: "Clarity of Speech & Voice Modulation",
-        score: feedback.speech.score,
-        summary: feedback.speech.summary,
-        coachingSuggestions: feedback.speech.coachingSuggestions || []
-      },
-      {
-        title: "Body Language & Facial Expression",
-        score: feedback.bodyLanguage.score,
-        summary: feedback.bodyLanguage.summary,
-        coachingSuggestions: feedback.bodyLanguage.coachingSuggestions || []
-      },
-      {
-        title: "Content Structure",
-        score: feedback.contentStructure.score,
-        summary: feedback.contentStructure.summary,
-        coachingSuggestions: feedback.contentStructure.coachingSuggestions || []
-      }
-    ]
+    overallSummary: feedback.overallSummary,
+    priorityFocus: feedback.priorityFocus,
+    sections
   };
 }
 

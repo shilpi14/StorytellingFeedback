@@ -1,31 +1,63 @@
 // Mock analysis pipeline. Used when Deepgram/Gemini API keys aren't configured.
 // The shape of the returned object is the contract the PDF generator relies on —
-// each category has a score, a short summary, and 0-3 coaching suggestions.
+// an overall summary + score, six named sections (each with a score, a short
+// summary, and 0-3 coaching suggestions), and a closing priority-focus paragraph.
 
-const TONE_OPTIONS = ["Confident", "Conversational", "Energetic", "Measured", "Hesitant"];
-
-const SPEECH_TIPS = [
-  "Cut filler words like 'um' and 'like'.",
-  "Slow down on your most important points.",
-  "Vary your pitch more to avoid sounding flat.",
-  "Use deliberate pauses to let key ideas land."
+const OPENING_TIPS = [
+  "Open with a vivid moment instead of background context.",
+  "Trim the warm-up — get to the hook within seconds.",
+  "Tease the stakes early so listeners lean in.",
+  "Ask a question that pulls the audience into the scene."
+];
+const NARRATIVE_TIPS = [
+  "Mark the turning point more clearly before the resolution.",
+  "Add one concrete detail to ground the middle section.",
+  "Tighten the middle so momentum carries through to the end.",
+  "Signal the shift from setup to conflict more deliberately."
 ];
 const BODY_TIPS = [
   "Add a few more hand gestures at key moments.",
-  "Relax your shoulders for a more natural posture.",
-  "Let your facial expressions match your message's energy.",
-  "Hold eye contact with the camera a bit longer."
+  "Relax your shoulders for a more natural, open posture.",
+  "Let your facial expressions match your story's emotional beats.",
+  "Hold eye contact with the camera a touch longer."
+];
+const VOCAL_TIPS = [
+  "Slow down on your most important lines for emphasis.",
+  "Use a deliberate pause right before the turning point.",
+  "Vary your pitch more to avoid sounding flat.",
+  "Let your volume rise and fall with the story's energy."
 ];
 const CONTENT_TIPS = [
-  "Open with a sharper hook to grab attention fast.",
-  "Tighten your closing into one memorable takeaway.",
-  "Add an emotional beat alongside your logical points.",
-  "Loop back to your opening idea for better coherence."
+  "Add a concrete example to make the idea more vivid.",
+  "Lean on one strong detail rather than several small ones.",
+  "Connect the story back to why it matters to listeners.",
+  "Trim a tangent so the core idea stays sharp."
+];
+const LANDING_TIPS = [
+  "End on the image that best captures your message.",
+  "Land the takeaway in one short, quotable line.",
+  "Circle back to your opening for a satisfying close.",
+  "Resist adding new ideas after your closing line."
+];
+
+const OVERALL_SUMMARIES = [
+  "This speaker brings a warm, conversational presence and a story worth telling — the raw material for something memorable is clearly there.\n\nWith a few focused adjustments to structure and delivery, this talk could move from solid to genuinely compelling.",
+  "There's real charm and authenticity in this delivery, and the story has a clear emotional core that audiences will connect with.\n\nSharpening a handful of moments — the opening, the pacing, the close — would let that authenticity land with even more impact."
+];
+
+const PRIORITY_FOCUSES = [
+  "Before the next session, focus on the opening — a sharper hook in the first few seconds will pull listeners in and set up everything that follows.",
+  "The single highest-leverage change for next time is tightening the close: landing on one clear, memorable takeaway will make the whole story stick.",
+  "The most valuable thing to work on next is pacing — adding deliberate pauses around key moments will let the story's best lines truly land."
 ];
 
 function pickRandom(pool, count) {
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
+}
+
+function pickOne(pool) {
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function randomScore(min = 60, max = 95) {
@@ -40,40 +72,63 @@ function randomSuggestions(pool) {
   return pickRandom(pool, count);
 }
 
+const SECTION_DEFS = [
+  {
+    title: "Opening & Hook",
+    tips: OPENING_TIPS,
+    summary: "The opening sets up context, though the hook could grab attention a little faster."
+  },
+  {
+    title: "Narrative Structure",
+    tips: NARRATIVE_TIPS,
+    summary: "The story moves through a clear beginning, middle, and end with a recognizable turning point."
+  },
+  {
+    title: "Body Language & Presence",
+    tips: BODY_TIPS,
+    summary: "Posture, gestures, and expressiveness came across as natural and engaged on camera."
+  },
+  {
+    title: "Vocal Delivery & Pacing",
+    tips: VOCAL_TIPS,
+    summary: "Pace and vocal energy were steady, with room for more variety around the key moments."
+  },
+  {
+    title: "Story Content",
+    tips: CONTENT_TIPS,
+    summary: "The story's content felt relevant and credible, anchored by a clear central idea."
+  },
+  {
+    title: "Landing & Takeaway",
+    tips: LANDING_TIPS,
+    summary: "The closing wraps up the story, and a slightly sharper final line would make it more memorable."
+  }
+];
+
 function generateFeedback(fileName, { speakerName = "", context = "" } = {}) {
-  const scores = {
-    speech: randomScore(),
-    bodyLanguage: randomScore(),
-    contentStructure: randomScore()
-  };
-  const overall = Math.round((scores.speech + scores.bodyLanguage + scores.contentStructure) / 3);
+  const sections = SECTION_DEFS.map((def) => {
+    const score = randomScore();
+    return {
+      title: def.title,
+      score,
+      summary: def.summary,
+      coachingSuggestions: randomSuggestions(def.tips)
+    };
+  });
+
+  const overallScore = Math.round(
+    sections.reduce((sum, section) => sum + section.score, 0) / sections.length
+  );
 
   return {
     fileName,
     speakerName,
     context,
     generatedAt: new Date().toISOString(),
-    overallScore: overall,
-    sections: [
-      {
-        title: "Clarity of Speech & Voice Modulation",
-        score: scores.speech,
-        summary: `Pace, articulation, and vocal variety came across as ${TONE_OPTIONS[Math.floor(Math.random() * TONE_OPTIONS.length)].toLowerCase()}, based on the audio track.`,
-        coachingSuggestions: randomSuggestions(SPEECH_TIPS)
-      },
-      {
-        title: "Body Language & Facial Expression",
-        score: scores.bodyLanguage,
-        summary: "Eye contact, posture, framing, and facial expressiveness were assessed from the video frames.",
-        coachingSuggestions: randomSuggestions(BODY_TIPS)
-      },
-      {
-        title: "Content Structure",
-        score: scores.contentStructure,
-        summary: "The opening, closing, coherence of ideas, and persuasive use of logic, emotion, and credibility were assessed from the transcript.",
-        coachingSuggestions: randomSuggestions(CONTENT_TIPS)
-      }
-    ]
+    overallScore,
+    overallSummary: pickOne(OVERALL_SUMMARIES),
+    priorityFocus: pickOne(PRIORITY_FOCUSES),
+    sections
   };
 }
 

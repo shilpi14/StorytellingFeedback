@@ -53,7 +53,15 @@ function buildFeedbackPdf(feedback, res) {
   metaLines.forEach((line) => doc.text(line, { align: "center", lineGap: 2 }));
   doc.moveDown(1.6);
 
-  heading(doc, `Overall Score: ${toTen(feedback.overallScore)} / 10`, 17);
+  heading(doc, `Overall storytelling score: ${toTen(feedback.overallScore)} / 10`, 17);
+  if (feedback.overallSummary) {
+    doc.moveDown(0.4);
+    feedback.overallSummary
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .forEach((paragraph) => body(doc, paragraph));
+  }
   doc.moveDown(1.2);
 
   feedback.sections.forEach((section, index) => {
@@ -71,6 +79,14 @@ function buildFeedbackPdf(feedback, res) {
 
     if (index < feedback.sections.length - 1) doc.moveDown(1.1);
   });
+
+  // --- Priority focus for next session ---
+  if (feedback.priorityFocus) {
+    doc.moveDown(1.4);
+    heading(doc, "Priority Focus for Next Session", 13);
+    doc.moveDown(0.3);
+    body(doc, feedback.priorityFocus);
+  }
 
   // --- Real snapshots from the speaker's own video ---
   if (feedback.frames && feedback.frames.length) {
