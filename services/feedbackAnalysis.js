@@ -38,22 +38,19 @@ const FEEDBACK_SCHEMA = {
       "1-2 sentences on how the talk opens — does the title/intro create context, and does the " +
       "hook grab the audience's attention right away?"
     ),
-    narrativeStructure: categorySchema(
-      "1-2 sentences on the story's structure — clear beginning/middle/end, logical flow, use of " +
-      "credibility markers or proof points, and build toward a climactic moment."
+    bodyLanguageFacialExpressions: categorySchema(
+      "1-2 sentences on body language and facial expressions — posture, gestures, movement, eye " +
+      "contact, and how well facial expressions match the story's emotional beats."
     ),
-    bodyLanguagePresence: categorySchema(
-      "1-2 sentences on body language and presence — posture, gestures, movement, and overall " +
-      "expressiveness/energy."
+    voiceTonalityModulation: categorySchema(
+      "1-2 sentences on voice tonality and modulation — vocal variety, pitch, energy, pauses, " +
+      "and emotional range in delivery."
     ),
-    vocalDeliveryPacing: categorySchema(
-      "1-2 sentences on vocal delivery and pacing — vocal variety, energy, pauses, and emotional range."
+    narrativeStructureCoherence: categorySchema(
+      "1-2 sentences on narrative structure and coherence — clear beginning/middle/end, logical " +
+      "flow between ideas, credibility markers or proof points, and build toward a climactic moment."
     ),
-    storyContent: categorySchema(
-      "1-2 sentences on the substance of the story/content — relevance of the topic, use of " +
-      "examples or evidence, and how well it establishes credibility."
-    ),
-    landingTakeaway: categorySchema(
+    closingTakeaway: categorySchema(
       "1-2 sentences on how the talk concludes — clarity and impact of the closing, and whether " +
       "it leaves a memorable, actionable takeaway."
     ),
@@ -68,11 +65,10 @@ const FEEDBACK_SCHEMA = {
   required: [
     "overallSummary",
     "openingHook",
-    "narrativeStructure",
-    "bodyLanguagePresence",
-    "vocalDeliveryPacing",
-    "storyContent",
-    "landingTakeaway",
+    "bodyLanguageFacialExpressions",
+    "voiceTonalityModulation",
+    "narrativeStructureCoherence",
+    "closingTakeaway",
     "priorityFocus"
   ]
 };
@@ -80,14 +76,13 @@ const FEEDBACK_SCHEMA = {
 const SYSTEM_PROMPT = `You are an expert storytelling and presentation coach for StoryWallahs. You will be
 given a video of someone telling a story or giving a talk, along with its transcript (and possibly the
 speaker's name and the context/topic). Watch the video and read the transcript, then assess the speaker
-across exactly six categories, in this order:
+across exactly five categories, in this order:
 
-1. Opening & Hook — does the intro create context and immediately grab attention?
-2. Narrative Structure — clear beginning/middle/end, logical flow, credibility markers, build to a climax
-3. Body Language & Presence — posture, gestures, movement, expressiveness, energy
-4. Vocal Delivery & Pacing — vocal variety, energy, pauses, emotional range
-5. Story Content — relevance, use of examples/evidence, credibility
-6. Landing & Takeaway — clarity and impact of the closing, memorable takeaway
+1. Opening and Hook — does the intro create context and immediately grab attention?
+2. Body Language and Facial Expressions — posture, gestures, movement, eye contact, expressiveness
+3. Voice Tonality and Modulation — vocal variety, pitch, energy, pauses, emotional range
+4. Narrative Structure and Coherence — clear beginning/middle/end, logical flow, credibility markers, build to a climax
+5. Closing and Takeaway — clarity and impact of the closing, memorable takeaway
 
 For each category, give a score from 0-100, a short 1-2 sentence summary, and 0-3 coaching
 suggestions specific to THAT category. Keep every coaching suggestion to ONE short, punchy
@@ -123,7 +118,7 @@ async function uploadVideo(videoBuffer, mimeType, displayName) {
 
 /**
  * Sends the uploaded video plus its transcript (and optional speaker name / context)
- * to Gemini and returns the structured six-category storytelling assessment.
+ * to Gemini and returns the structured five-category storytelling assessment.
  */
 async function analyzeVideoWithGemini({
   videoBuffer,

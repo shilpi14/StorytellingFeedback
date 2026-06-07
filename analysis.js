@@ -1,6 +1,6 @@
 // Mock analysis pipeline. Used when Deepgram/Gemini API keys aren't configured.
 // The shape of the returned object is the contract the PDF generator relies on —
-// an overall summary + score, six named sections (each with a score, a short
+// an overall summary + score, five named sections (each with a score, a short
 // summary, and 0-3 coaching suggestions), and a closing priority-focus paragraph.
 
 const OPENING_TIPS = [
@@ -9,31 +9,25 @@ const OPENING_TIPS = [
   "Tease the stakes early so listeners lean in.",
   "Ask a question that pulls the audience into the scene."
 ];
-const NARRATIVE_TIPS = [
-  "Mark the turning point more clearly before the resolution.",
-  "Add one concrete detail to ground the middle section.",
-  "Tighten the middle so momentum carries through to the end.",
-  "Signal the shift from setup to conflict more deliberately."
-];
 const BODY_TIPS = [
   "Add a few more hand gestures at key moments.",
   "Relax your shoulders for a more natural, open posture.",
   "Let your facial expressions match your story's emotional beats.",
   "Hold eye contact with the camera a touch longer."
 ];
-const VOCAL_TIPS = [
+const VOICE_TIPS = [
   "Slow down on your most important lines for emphasis.",
   "Use a deliberate pause right before the turning point.",
   "Vary your pitch more to avoid sounding flat.",
   "Let your volume rise and fall with the story's energy."
 ];
-const CONTENT_TIPS = [
-  "Add a concrete example to make the idea more vivid.",
-  "Lean on one strong detail rather than several small ones.",
-  "Connect the story back to why it matters to listeners.",
-  "Trim a tangent so the core idea stays sharp."
+const NARRATIVE_TIPS = [
+  "Mark the turning point more clearly before the resolution.",
+  "Add one concrete detail to ground the middle section.",
+  "Tighten the middle so momentum carries through to the end.",
+  "Signal the shift from setup to conflict more deliberately."
 ];
-const LANDING_TIPS = [
+const CLOSING_TIPS = [
   "End on the image that best captures your message.",
   "Land the takeaway in one short, quotable line.",
   "Circle back to your opening for a satisfying close.",
@@ -74,33 +68,28 @@ function randomSuggestions(pool) {
 
 const SECTION_DEFS = [
   {
-    title: "Opening & Hook",
+    title: "Opening and Hook",
     tips: OPENING_TIPS,
     summary: "The opening sets up context, though the hook could grab attention a little faster."
   },
   {
-    title: "Narrative Structure",
-    tips: NARRATIVE_TIPS,
-    summary: "The story moves through a clear beginning, middle, and end with a recognizable turning point."
-  },
-  {
-    title: "Body Language & Presence",
+    title: "Body Language and Facial Expressions",
     tips: BODY_TIPS,
     summary: "Posture, gestures, and expressiveness came across as natural and engaged on camera."
   },
   {
-    title: "Vocal Delivery & Pacing",
-    tips: VOCAL_TIPS,
+    title: "Voice Tonality and Modulation",
+    tips: VOICE_TIPS,
     summary: "Pace and vocal energy were steady, with room for more variety around the key moments."
   },
   {
-    title: "Story Content",
-    tips: CONTENT_TIPS,
-    summary: "The story's content felt relevant and credible, anchored by a clear central idea."
+    title: "Narrative Structure and Coherence",
+    tips: NARRATIVE_TIPS,
+    summary: "The story moves through a clear beginning, middle, and end with a recognizable turning point."
   },
   {
-    title: "Landing & Takeaway",
-    tips: LANDING_TIPS,
+    title: "Closing and Takeaway",
+    tips: CLOSING_TIPS,
     summary: "The closing wraps up the story, and a slightly sharper final line would make it more memorable."
   }
 ];
