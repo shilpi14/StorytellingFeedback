@@ -7,43 +7,43 @@ const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
 const FEEDBACK_SCHEMA = {
   type: SchemaType.OBJECT,
   properties: {
-    tone: {
-      type: SchemaType.OBJECT,
-      properties: {
-        score: { type: SchemaType.INTEGER, description: "0-100" },
-        summary: { type: SchemaType.STRING, description: "1-2 sentences on the speaker's emotional tone." }
-      },
-      required: ["score", "summary"]
-    },
-    delivery: {
+    speech: {
       type: SchemaType.OBJECT,
       properties: {
         score: { type: SchemaType.INTEGER, description: "0-100" },
         summary: {
           type: SchemaType.STRING,
-          description: "Assessment of pace, clarity, filler words, and vocal energy."
+          description:
+            "1-2 sentences assessing clarity of speech and voice modulation — articulation, pacing, " +
+            "filler words, vocal energy, tone, and how well the voice's pitch/volume/emphasis varied " +
+            "to keep the listener engaged."
         }
       },
       required: ["score", "summary"]
     },
-    visual: {
+    bodyLanguage: {
       type: SchemaType.OBJECT,
       properties: {
         score: { type: SchemaType.INTEGER, description: "0-100" },
         summary: {
           type: SchemaType.STRING,
-          description: "Assessment of eye contact, posture, framing, facial expression, and gestures."
+          description:
+            "1-2 sentences assessing body language and facial expression — eye contact with the " +
+            "camera, posture, framing, facial expressiveness, and use of gestures."
         }
       },
       required: ["score", "summary"]
     },
-    content: {
+    contentStructure: {
       type: SchemaType.OBJECT,
       properties: {
         score: { type: SchemaType.INTEGER, description: "0-100" },
         summary: {
           type: SchemaType.STRING,
-          description: "Assessment of structure (intro/body/conclusion), language quality, and messaging clarity."
+          description:
+            "1-2 sentences assessing content structure — quality of the opening (does it hook the " +
+            "audience), impact of the closing, coherence and logical flow of ideas, persuasion through " +
+            "emotional appeal/logic/credibility (ethos/pathos/logos), and general language quality."
         }
       },
       required: ["score", "summary"]
@@ -59,20 +59,27 @@ const FEEDBACK_SCHEMA = {
       description: "Exactly 3 specific, actionable suggestions for improvement."
     }
   },
-  required: ["tone", "delivery", "visual", "content", "strengths", "improvements"]
+  required: ["speech", "bodyLanguage", "contentStructure", "strengths", "improvements"]
 };
 
 const SYSTEM_PROMPT = `You are an expert communication and presentation coach. You will be given a video
-of someone speaking, along with its transcript. Watch the video and read the transcript, then assess:
+of someone speaking, along with its transcript. Watch the video and read the transcript, then assess
+the speaker across exactly three categories:
 
-- Tone: how the speaker comes across emotionally (confident, hesitant, energetic, etc.)
-- Delivery: pacing, clarity, filler-word usage, vocal variety
-- Visual presence: eye contact with the camera, posture, framing, facial expression, gestures
-- Content: structure (clear intro/body/conclusion), language quality (grammar, vocabulary, clarity),
-  and overall messaging (is the key point clear, is it persuasive, is there a strong takeaway)
+- Clarity of speech and voice modulation: articulation, pacing, filler-word usage, vocal energy,
+  emotional tone, and how well pitch/volume/emphasis varied to keep the listener engaged
+- Body language and facial expression: eye contact with the camera, posture, framing,
+  facial expressiveness, and use of gestures
+- Content structure: a strong opening that hooks the audience, an impactful closing, coherence and
+  logical flow of ideas, and persuasion through emotional appeal, logic, and credibility — plus
+  general language quality (grammar, vocabulary, clarity)
 
-Score each from 0-100. Be specific — reference actual moments, phrases, or visual details rather
-than generic advice. Respond only with the structured JSON described by the schema.`;
+Score each from 0-100, with a short 1-2 sentence summary per category. Separately, also provide:
+- strengths: exactly 3 specific things the speaker did well, citing moments from the video or transcript
+- improvements: exactly 3 specific, actionable suggestions for improvement
+
+Be specific — reference actual moments, phrases, or visual details rather than generic advice.
+Respond only with the structured JSON described by the schema.`;
 
 /**
  * Uploads the video to Gemini's File API and waits until it finishes processing.

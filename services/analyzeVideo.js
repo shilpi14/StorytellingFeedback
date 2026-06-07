@@ -20,7 +20,7 @@ async function analyzeVideo(videoBuffer, fileName, mimeType) {
   });
 
   const overallScore = Math.round(
-    (feedback.tone.score + feedback.delivery.score + feedback.visual.score + feedback.content.score) / 4
+    (feedback.speech.score + feedback.bodyLanguage.score + feedback.contentStructure.score) / 3
   );
 
   return {
@@ -28,10 +28,9 @@ async function analyzeVideo(videoBuffer, fileName, mimeType) {
     generatedAt: new Date().toISOString(),
     overallScore,
     sections: [
-      { title: "Tone", score: feedback.tone.score, summary: feedback.tone.summary },
-      { title: "Speech & Delivery", score: feedback.delivery.score, summary: feedback.delivery.summary },
-      { title: "Visual & Body Language", score: feedback.visual.score, summary: feedback.visual.summary },
-      { title: "Content & Messaging", score: feedback.content.score, summary: feedback.content.summary }
+      { title: "Clarity of Speech & Voice Modulation", score: feedback.speech.score, summary: feedback.speech.summary },
+      { title: "Body Language & Facial Expression", score: feedback.bodyLanguage.score, summary: feedback.bodyLanguage.summary },
+      { title: "Content Structure", score: feedback.contentStructure.score, summary: feedback.contentStructure.summary }
     ],
     strengths: feedback.strengths,
     improvements: feedback.improvements
