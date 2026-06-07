@@ -65,6 +65,25 @@ body {
   color: #9a98ab;
 }
 
+.upload-hint {
+  margin: 8px 2px 0;
+  font-size: 12.5px;
+  color: #9a98ab;
+  text-align: center;
+}
+
+.upload-warning {
+  margin: 10px 2px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fdecec;
+  border: 1px solid #f5c6c6;
+  color: #a23b3b;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .field input[type="text"] {
   width: 100%;
   padding: 12px 14px;

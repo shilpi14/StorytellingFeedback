@@ -20,10 +20,15 @@ if (!apisConfigured) {
   console.warn("Deepgram/Gemini API keys not configured — using mock analysis. See .env.example.");
 }
 
+// Videos are buffered fully into memory (multer.memoryStorage) before processing,
+// so the cap has to leave headroom for Node + ffmpeg + the Gemini upload on a
+// memory-constrained host. 200MB comfortably covers a multi-minute storytelling
+// clip while keeping the server responsive rather than stalling on huge uploads.
+const MAX_UPLOAD_BYTES = 200 * 1024 * 1024; // 200MB
 const app = express();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 500 * 1024 * 1024 } // 500MB
+  limits: { fileSize: MAX_UPLOAD_BYTES }
 });
 
 // In-memory store of completed analyses, keyed by report id.
@@ -31,7 +36,23 @@ const reports = new Map();
 
 app.use(express.static("public"));
 
-app.post("/api/analyze", upload.single("video"), async (req, res) => {
+function handleUpload(req, res, next) {
+  upload.single("video")(req, res, (err) => {
+    if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+      const maxMb = Math.round(MAX_UPLOAD_BYTES / (1024 * 1024));
+      return res.status(413).json({
+        error: `That video is larger than our ${maxMb}MB limit. Please trim it to a shorter clip (a focused 1-3 minute story works best) and try again.`
+      });
+    }
+    if (err) {
+      console.error("Upload failed:", err);
+      return res.status(400).json({ error: "We couldn't read that upload. Please try a different video file." });
+    }
+    next();
+  });
+}
+
+app.post("/api/analyze", handleUpload, async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No video file uploaded." });
   }
