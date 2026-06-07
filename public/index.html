@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Video Analyzer</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div class="hero-icon">🎬</div>
+      <h1>Video Analyzer</h1>
+    </header>
+
+    <section id="upload-section" class="card">
+      <label for="video-input" id="upload-label" class="upload-label">
+        <span class="upload-icon">📹</span>
+        <span id="file-name">Choose a video</span>
+        <input type="file" id="video-input" accept="video/*" />
+      </label>
+      <video id="video-preview" class="video-preview hidden" controls playsinline></video>
+      <button id="analyze-btn" disabled>✨ Analyze</button>
+    </section>
+
+    <section id="status-section" class="card hidden">
+      <div class="spinner"></div>
+      <p id="status-text">Analyzing…</p>
+    </section>
+
+    <section id="result-section" class="card hidden">
+      <div class="score-ring" id="score-ring">
+        <span id="overall-score">--</span>
+      </div>
+      <p class="score-caption">Overall score</p>
+      <ul id="section-list"></ul>
+      <a id="download-link" class="button" href="#" download>⬇️ Download PDF</a>
+      <button id="reset-btn" class="secondary">↻ Try another video</button>
+    </section>
+
+    <section id="error-section" class="card hidden">
+      <span class="error-icon">⚠️</span>
+      <p id="error-text"></p>
+      <button id="error-reset-btn" class="secondary">↻ Try again</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
