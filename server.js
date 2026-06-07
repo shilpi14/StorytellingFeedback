@@ -6,6 +6,7 @@ const crypto = require("crypto");
 
 const { generateFeedback } = require("./analysis");
 const { analyzeVideo } = require("./services/analyzeVideo");
+const { extractFrames } = require("./services/mediaExtraction");
 const { buildFeedbackPdf } = require("./pdf");
 
 // Real analysis needs both API keys configured (not the placeholder values).
@@ -46,8 +47,17 @@ app.post("/api/analyze", upload.single("video"), async (req, res) => {
       ? await analyzeVideo(req.file.buffer, req.file.originalname, req.file.mimetype, { speakerName, context })
       : generateFeedback(req.file.originalname, { speakerName, context });
 
+    // Grab a few real snapshots from the speaker's own video for the PDF —
+    // independent of mock vs. real analysis, since it's just local ffmpeg work.
+    const frames = await extractFrames(req.file.buffer, 4).catch((err) => {
+      console.error("Frame extraction failed:", err);
+      return [];
+    });
+
     const id = crypto.randomUUID();
-    reports.set(id, feedback);
+    // Keep the (potentially large) image buffers server-side only — the PDF route
+    // needs them, but the JSON response to the browser should stay lightweight.
+    reports.set(id, { ...feedback, frames });
     res.json({ id, feedback });
   } catch (err) {
     console.error("Analysis failed:", err);

@@ -5,22 +5,22 @@
 const TONE_OPTIONS = ["Confident", "Conversational", "Energetic", "Measured", "Hesitant"];
 
 const SPEECH_TIPS = [
-  "Try to reduce filler words such as 'um' and 'like' for a crisper delivery.",
-  "Slowing down slightly during the most important points would add emphasis.",
-  "Varying pitch and volume more would help avoid a monotone feel.",
-  "Using more deliberate pauses would give key ideas room to land."
+  "Cut filler words like 'um' and 'like'.",
+  "Slow down on your most important points.",
+  "Vary your pitch more to avoid sounding flat.",
+  "Use deliberate pauses to let key ideas land."
 ];
 const BODY_TIPS = [
-  "A few more hand gestures at key moments would help reinforce the message.",
-  "Relaxing the shoulders a little would make the posture feel more natural.",
-  "More variation in facial expression would add warmth to the delivery.",
-  "Holding eye contact with the camera a touch longer would build connection."
+  "Add a few more hand gestures at key moments.",
+  "Relax your shoulders for a more natural posture.",
+  "Let your facial expressions match your message's energy.",
+  "Hold eye contact with the camera a bit longer."
 ];
 const CONTENT_TIPS = [
-  "A stronger opening line would help hook the audience even faster.",
-  "The closing could be tightened into a single, more memorable takeaway.",
-  "Leaning more on emotional appeal alongside the logical points would make the message land harder.",
-  "Tying the middle section back to the opening idea would improve coherence."
+  "Open with a sharper hook to grab attention fast.",
+  "Tighten your closing into one memorable takeaway.",
+  "Add an emotional beat alongside your logical points.",
+  "Loop back to your opening idea for better coherence."
 ];
 
 function pickRandom(pool, count) {

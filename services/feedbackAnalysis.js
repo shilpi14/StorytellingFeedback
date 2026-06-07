@@ -14,9 +14,10 @@ function categorySchema(summaryDescription) {
         type: SchemaType.ARRAY,
         items: { type: SchemaType.STRING },
         description:
-          "0 to 3 short, specific, actionable coaching tips for this category only. Omit this category's " +
-          "suggestions (use an empty array) if the speaker is already strong here and there's nothing " +
-          "meaningfully actionable to add — don't pad with generic advice just to reach 3."
+          "0 to 3 coaching tips for this category only. Each tip MUST be a single short sentence " +
+          "(roughly 8-14 words) — specific and actionable, not a generic platitude. Omit this " +
+          "category's suggestions (use an empty array) if the speaker is already strong here and " +
+          "there's nothing meaningfully actionable to add — don't pad with filler just to reach 3."
       }
     },
     required: ["score", "summary", "coachingSuggestions"]
@@ -58,10 +59,11 @@ categories:
   general language quality (grammar, vocabulary, clarity)
 
 For each category, give a score from 0-100, a short 1-2 sentence summary, and 0-3 coaching
-suggestions specific to THAT category. Coaching suggestions should be specific and actionable
-(reference actual moments, phrases, or visual details where possible) — and only included where
-they truly add value. If the speaker is already excellent in a category, it's fine to return an
-empty list of suggestions for it rather than inventing generic advice.
+suggestions specific to THAT category. Keep every coaching suggestion to ONE short, punchy
+sentence (about 8-14 words) — specific and actionable (reference actual moments, phrases, or
+visual details where possible), never a vague platitude. Only include suggestions that truly add
+value; if the speaker is already excellent in a category, it's fine to return an empty list rather
+than inventing generic advice.
 
 Respond only with the structured JSON described by the schema.`;
 
